@@ -9,7 +9,7 @@ Route::get('/', function () {
 use App\Http\Controllers\AuthController;
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login'); // tampilkan form login
-Route::post('/login', [AuthController::class, 'login']); // proses login
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login'); // proses login dengan rate limiting
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout'); // proses logout
 
 Route::get('/admin/dashboard', function () {

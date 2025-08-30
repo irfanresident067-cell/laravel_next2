@@ -4,26 +4,17 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Foundation\Auth\ThrottlesLogins; // Import trait ThrottlesLogins
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    // Gunakan trait untuk throttling
-    use ThrottlesLogins;
-
-    // Tentukan field yang digunakan untuk username (untuk throttling)
-    public function username()
-    {
-        return 'email';
-    }
-
     // Tampilkan halaman login
     public function showLoginForm()
     {
-        return view('auth.login'); // nanti pakai template Metronic
+        return view('auth.login');
     }
 
-    // Proses login dengan keamanan tambahan
+    // Proses login (logika throttling dipindahkan ke middleware)
     public function login(Request $request)
     {
         // 1. Validasi input
@@ -32,19 +23,10 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        // 2. Cek apakah pengguna sudah terlalu banyak mencoba login
-        if ($this->hasTooManyLoginAttempts($request)) {
-            $this->fireLockoutEvent($request);
-
-            return $this->sendLockoutResponse($request);
-        }
-
         $credentials = $request->only('email', 'password');
 
-        // 3. Coba autentikasi pengguna
+        // 2. Coba autentikasi pengguna
         if (Auth::attempt($credentials)) {
-            // Jika berhasil, reset percobaan login dan regenerasi session
-            $this->clearLoginAttempts($request);
             $request->session()->regenerate();
 
             // Redirect berdasarkan role
@@ -55,13 +37,10 @@ class AuthController extends Controller
             }
         }
 
-        // 4. Jika gagal, catat percobaan login
-        $this->incrementLoginAttempts($request);
-
-        // Kembali dengan pesan error
-        return back()->withErrors([
-            'email' => 'Email atau password yang Anda masukkan salah.',
-        ])->withInput($request->only('email'));
+        // 3. Jika gagal, kirim ValidationException
+        throw ValidationException::withMessages([
+            'email' => __('auth.failed'),
+        ]);
     }
 
     // Logout user
