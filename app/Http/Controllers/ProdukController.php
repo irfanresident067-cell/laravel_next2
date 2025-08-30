@@ -40,14 +40,17 @@ class ProdukController extends Controller
 
         return redirect()->route('produks.index')
                          ->with('success', 'Produk berhasil ditambahkan.');
+
     }
 
     /**
      * Display the specified resource.
      */
+
     public function show(Produk $produk)
     {
         return view('produks.show', compact('produk'));
+
     }
 
     /**
@@ -56,6 +59,7 @@ class ProdukController extends Controller
     public function edit(Produk $produk)
     {
         return view('produks.edit', compact('produk'));
+
     }
 
     /**
