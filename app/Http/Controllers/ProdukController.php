@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Produk;
 use Illuminate\Http\Request;
 
 class ProdukController extends Controller
@@ -11,7 +12,8 @@ class ProdukController extends Controller
      */
     public function index()
     {
-        //
+        $produks = Produk::latest()->paginate(10);
+        return view('produks.index', compact('produks'));
     }
 
     /**
@@ -19,7 +21,7 @@ class ProdukController extends Controller
      */
     public function create()
     {
-        //
+        return view('produks.create');
     }
 
     /**
@@ -27,38 +29,65 @@ class ProdukController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'nama_produk' => 'required|string|max:255',
+            'deskripsi' => 'nullable|string',
+            'harga' => 'required|integer',
+            'stok' => 'required|integer',
+        ]);
+
+        Produk::create($request->all());
+
+        return redirect()->route('produks.index')
+                         ->with('success', 'Produk berhasil ditambahkan.');
+
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+
+    public function show(Produk $produk)
     {
-        //
+        return view('produks.show', compact('produk'));
+
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Produk $produk)
     {
-        //
+        return view('produks.edit', compact('produk'));
+
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Produk $produk)
     {
-        //
+        $request->validate([
+            'nama_produk' => 'required|string|max:255',
+            'deskripsi' => 'nullable|string',
+            'harga' => 'required|integer',
+            'stok' => 'required|integer',
+        ]);
+
+        $produk->update($request->all());
+
+        return redirect()->route('produks.index')
+                         ->with('success', 'Produk berhasil diperbarui.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Produk $produk)
     {
-        //
+        $produk->delete();
+
+        return redirect()->route('produks.index')
+                         ->with('success', 'Produk berhasil dihapus.');
     }
 }
